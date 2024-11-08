@@ -1,8 +1,10 @@
 package org.example.springsecuritybackend.domain.user.entity;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.example.springsecuritybackend.domain.user.dto.request.JoinRequestDto;
 
 import static lombok.AccessLevel.PROTECTED;
 
@@ -21,4 +23,18 @@ public class User {
 
     private String role;
 
+    @Builder
+    private User(String username, String password, String role) {
+        this.username = username;
+        this.password = password;
+        this.role = role;
+    }
+
+    public static User of(String username, String password) {
+        return User.builder()
+                .username(username)
+                .password(password)
+                .role("ROLE_ADMIN")
+                .build();
+    }
 }
