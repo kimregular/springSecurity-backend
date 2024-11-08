@@ -1,4 +1,4 @@
-package org.example.springsecuritybackend.domain.user.response;
+package org.example.springsecuritybackend.domain.user.dto.response;
 
 import lombok.Getter;
 
