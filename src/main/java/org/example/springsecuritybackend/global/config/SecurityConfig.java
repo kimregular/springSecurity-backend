@@ -1,23 +1,36 @@
 package org.example.springsecuritybackend.global.config;
 
+import lombok.RequiredArgsConstructor;
+import org.example.springsecuritybackend.global.jwt.LoginFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final AuthenticationConfiguration authenticationConfiguration;
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
         // 암호 해싱
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+        return configuration.getAuthenticationManager();
     }
 
     @Bean
@@ -47,11 +60,15 @@ public class SecurityConfig {
         denyAll() : 로그인을 완료 했더라도 모든 사용자가 접근 불가능
          */
         http.authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/v1/join","/api/v1/login").permitAll()
+                .requestMatchers("/api/v1/join", "/api/v1/login").permitAll()
                 .requestMatchers("/api/v1/admin").hasRole("ADMIN")
                 .requestMatchers("/api/v1/my/**").hasAnyRole("ADMIN", "USER")
                 .anyRequest().authenticated()
         );
+
+        http.addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration)), UsernamePasswordAuthenticationFilter.class);
+        // UsernamePasswordAuthenticationFilter는 원래 form 로그인에 쓰이는 필터이지만 JWT 검증용으로 개조시켜 사용함
+        // 따라서 개조한 필터가 딱 원래 필터 위치에서 실행되도록 `addFilterAt()`메서드로 위치를 정해줌
 
         // 세션 설정
         http.sessionManagement(session -> session.sessionCreationPolicy(STATELESS));

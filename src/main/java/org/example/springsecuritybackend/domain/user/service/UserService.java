@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder; // 암호 해싱
 
     public User joinProcess(JoinRequestDto joinRequestDto) {
         String username = joinRequestDto.username();

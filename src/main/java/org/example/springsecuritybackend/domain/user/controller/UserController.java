@@ -29,9 +29,7 @@ public class UserController {
 
     @PostMapping("/login")
     public LoginResponseDto postLogin(@RequestBody LoginRequestDto loginRequestDto) {
-        System.out.println(loginRequestDto.username());
-        System.out.println(loginRequestDto.password());
-        return new LoginResponseDto();
+        return new LoginResponseDto(loginRequestDto.username(), loginRequestDto.password());
     }
 
     @GetMapping("/admin")

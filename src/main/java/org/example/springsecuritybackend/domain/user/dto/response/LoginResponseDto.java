@@ -5,6 +5,11 @@ import lombok.Getter;
 @Getter
 public class LoginResponseDto {
 
-    private final String response = "OK";
-    private final String message = "YOU ARE LOGGED IN!";
+    private final String response;
+    private final String message;
+
+    public LoginResponseDto(String response, String message) {
+        this.response = response;
+        this.message = message;
+    }
 }
