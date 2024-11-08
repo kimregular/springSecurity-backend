@@ -1,0 +1,8 @@
+### join user
+POST localhost:8080/api/v1/join
+Content-Type: application/json
+
+{
+  "username" : "tester1",
+  "password" : "123123"
+}

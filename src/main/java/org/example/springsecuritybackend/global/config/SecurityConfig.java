@@ -47,7 +47,7 @@ public class SecurityConfig {
         denyAll() : 로그인을 완료 했더라도 모든 사용자가 접근 불가능
          */
         http.authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/v1/login").permitAll()
+                .requestMatchers("/api/v1/join","/api/v1/login").permitAll()
                 .requestMatchers("/api/v1/admin").hasRole("ADMIN")
                 .requestMatchers("/api/v1/my/**").hasAnyRole("ADMIN", "USER")
                 .anyRequest().authenticated()
