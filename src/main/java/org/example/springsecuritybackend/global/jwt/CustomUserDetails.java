@@ -35,14 +35,9 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        Collection<GrantedAuthority> collections = new ArrayList<>();
-        collections.add(new GrantedAuthority() {
-            @Override
-            public String getAuthority() {
-                return user.getRole();
-            }
-        });
-        return collections;
+        Collection<GrantedAuthority> collection = new ArrayList<>();
+        collection.add((GrantedAuthority) user::getRole);
+        return collection;
     }
 
     @Override

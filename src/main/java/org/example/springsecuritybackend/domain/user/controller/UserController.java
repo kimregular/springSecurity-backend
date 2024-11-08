@@ -2,9 +2,7 @@ package org.example.springsecuritybackend.domain.user.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.example.springsecuritybackend.domain.user.dto.request.JoinRequestDto;
-import org.example.springsecuritybackend.domain.user.dto.request.LoginRequestDto;
 import org.example.springsecuritybackend.domain.user.dto.response.HomeResponseDto;
-import org.example.springsecuritybackend.domain.user.dto.response.LoginResponseDto;
 import org.example.springsecuritybackend.domain.user.entity.User;
 import org.example.springsecuritybackend.domain.user.service.UserService;
 import org.springframework.web.bind.annotation.*;
@@ -25,11 +23,6 @@ public class UserController {
     public String postJoin(@RequestBody JoinRequestDto joinRequestDto) {
         User user = userService.joinProcess(joinRequestDto);
         return "ok";
-    }
-
-    @PostMapping("/login")
-    public LoginResponseDto postLogin(@RequestBody LoginRequestDto loginRequestDto) {
-        return new LoginResponseDto(loginRequestDto.username(), loginRequestDto.password());
     }
 
     @GetMapping("/admin")

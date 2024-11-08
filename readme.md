@@ -46,3 +46,62 @@ JWT는
     - 단방향
 
 비밀키는 내부에 넣지 말고 properties 파일등에 따로 저장한다.
+
+## 트러블슈팅
+
+### 로그인 로직 완성 후 로그인이 안 되던 현상
+
+`SecurityConfig` 클래스의 일부이다.
+
+```java
+
+@Bean
+public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    // ...
+
+    http.authorizeHttpRequests(auth -> auth
+            .requestMatchers("/api/v1/join", "/api/v1/login", "/api/v1").permitAll()
+            .requestMatchers("/api/v1/admin").hasRole("ADMIN")
+            .requestMatchers("/api/v1/my/**").hasAnyRole("ADMIN", "USER")
+            .anyRequest().authenticated()
+    );
+
+    // ...
+}
+```
+
+로그인 로직을 처리하는 경로를 설정하기 위해 `permitAll()` 메서드에 원하는 경로를 지정했다.
+
+```java
+
+@Bean
+public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    // ...
+
+    http.addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration)), UsernamePasswordAuthenticationFilter.class);
+
+    // ...
+}
+```
+
+이후 로그인 필터를 생성하여 필터를 추가한다.
+
+이렇게 설정되면 원하는 로그인 경로(`/api/v1/login`)를 인식하지 못한다.
+
+#### 해결
+
+```java
+
+@Bean
+public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    // ...
+
+    LoginFilter loginFilter = new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil);
+    loginFilter.setFilterProcessesUrl("/api/v1/login");
+    http.addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter.class);
+
+    // ...
+}
+```
+
+생성후 바로 파라미터로 반환하지 않고 먼저 생성만 한 다음 필터가 동작할 경로를 추가로 설정한다. `setFilterProcessesUrl()`
