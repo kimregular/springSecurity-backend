@@ -24,7 +24,7 @@ public class User {
     private String role;
 
     @Builder
-    private User(String username, String password, String role) {
+    public User(String username, String password, String role) {
         this.username = username;
         this.password = password;
         this.role = role;

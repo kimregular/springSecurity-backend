@@ -1,6 +1,7 @@
 package org.example.springsecuritybackend.global.config;
 
 import lombok.RequiredArgsConstructor;
+import org.example.springsecuritybackend.global.jwt.JWTFilter;
 import org.example.springsecuritybackend.global.jwt.JWTUtil;
 import org.example.springsecuritybackend.global.jwt.LoginFilter;
 import org.springframework.context.annotation.Bean;
@@ -67,6 +68,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/my/**").hasAnyRole("ADMIN", "USER")
                 .anyRequest().authenticated()
         );
+
+        http.addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class);
 
         LoginFilter loginFilter = new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil);
         loginFilter.setFilterProcessesUrl("/api/v1/login");
