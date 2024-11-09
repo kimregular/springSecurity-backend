@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.example.springsecuritybackend.domain.user.dto.request.JoinRequestDto;
 
 import static lombok.AccessLevel.PROTECTED;
 
