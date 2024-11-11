@@ -23,9 +23,9 @@ public class JWTFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         // request에서 Authorization 헤더를 찾음
-        String authorization = request.getHeader("Authorization");
+        String token = request.getHeader("Authorization");
 
-        if (authorization == null || !authorization.startsWith("Bearer ")) {
+        if (token == null) {
             log.info("loin fail with no token");
             filterChain.doFilter(request, response);
 
@@ -34,8 +34,6 @@ public class JWTFilter extends OncePerRequestFilter {
         }
 
         log.info("토큰 확인 완료");
-        String token = authorization.split(" ")[1];
-
         if (jwtUtil.isExpired(token)) {
             log.info("토큰 시간 만료");
             filterChain.doFilter(request, response);
