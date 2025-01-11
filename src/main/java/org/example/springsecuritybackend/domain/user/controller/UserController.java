@@ -1,32 +1,29 @@
 package org.example.springsecuritybackend.domain.user.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.example.springsecuritybackend.domain.user.dto.request.JoinRequestDto;
-import org.example.springsecuritybackend.domain.user.dto.response.HomeResponseDto;
-import org.example.springsecuritybackend.domain.user.entity.User;
+import org.example.springsecuritybackend.domain.user.entity.Account;
+import org.example.springsecuritybackend.domain.user.dto.request.AccountDto;
 import org.example.springsecuritybackend.domain.user.service.UserService;
-import org.springframework.web.bind.annotation.*;
+import org.modelmapper.ModelMapper;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
 
-@RestController
-@RequestMapping("/api/v1")
+@Controller
 @RequiredArgsConstructor
 public class UserController {
 
-    private final UserService userService;
+	private final PasswordEncoder passwordEncoder;
+	private final ModelMapper mapper;
+	private final UserService userService;
 
-    @GetMapping
-    public HomeResponseDto home() {
-        return new HomeResponseDto();
-    }
-
-    @PostMapping("/join")
-    public String postJoin(@RequestBody JoinRequestDto joinRequestDto) {
-        User user = userService.joinProcess(joinRequestDto);
-        return "ok";
-    }
-
-    @GetMapping("/admin")
-    public String adminP() {
-        return "ADMIN CONTROLLER";
-    }
+	@PostMapping("/signup")
+	public String signup(AccountDto accountDto) {
+		Account account = mapper.map(accountDto,
+		                             Account.class);
+		account.setPassword(passwordEncoder.encode(accountDto.getPassword()));
+		userService.createUser(account);
+		return "redirect:/";
+	}
+=======
 }

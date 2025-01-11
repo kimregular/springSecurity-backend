@@ -1,31 +1,19 @@
 package org.example.springsecuritybackend.domain.user.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.springsecuritybackend.domain.user.dto.request.JoinRequestDto;
-import org.example.springsecuritybackend.domain.user.entity.User;
+import org.example.springsecuritybackend.domain.user.entity.Account;
 import org.example.springsecuritybackend.domain.user.repository.UserRepository;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class UserService {
 
-    private final UserRepository userRepository;
-    private final BCryptPasswordEncoder bCryptPasswordEncoder; // 암호 해싱
+	private final UserRepository userRepository;
 
-    public User joinProcess(JoinRequestDto joinRequestDto) {
-        String username = joinRequestDto.username();
-        String password = joinRequestDto.password();
-
-        Boolean isExists = userRepository.existsByUsername(username);
-
-        if (isExists) {
-            throw new IllegalArgumentException(String.format("이미 존재하는 회원입니다. username = %s", username));
-        }
-
-        User user = User.of(username, bCryptPasswordEncoder.encode(password));
-        userRepository.save(user);
-        return user;
-    }
+	public void createUser(Account account) {
+		userRepository.save(account);
+	}
 }
