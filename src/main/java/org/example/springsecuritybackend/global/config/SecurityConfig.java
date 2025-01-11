@@ -3,20 +3,27 @@ package org.example.springsecuritybackend.global.config;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.example.springsecuritybackend.global.filters.RestAuthenticationFilter;
 import org.example.springsecuritybackend.global.handlers.FormAccessDeniedHandler;
 import org.example.springsecuritybackend.global.handlers.FormAuthenticationFailureHandler;
 import org.example.springsecuritybackend.global.handlers.FormAuthenticationSuccessHandler;
 import org.example.springsecuritybackend.global.provider.FormAuthenticationProvider;
+import org.example.springsecuritybackend.global.token.RestAuthenticationToken;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationDetailsSource;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFilter;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
+
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -62,6 +69,37 @@ public class SecurityConfig {
 				.authenticationProvider(authenticationProvider)
 				.exceptionHandling(exception -> exception.accessDeniedHandler(new FormAccessDeniedHandler("/denied")));
 		return http.build();
+	}
+
+	@Bean
+	@Order(1)
+	public SecurityFilterChain restSecurityFilterChain(HttpSecurity http,
+	                                                   FormAuthenticationProvider authenticationProvider) throws
+	                                                                                                      Exception {
+		AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
+		AuthenticationManager authenticationManager = authenticationManagerBuilder.build();
+
+		http
+				.securityMatcher("/api/login")
+				.authorizeHttpRequests(auth -> auth
+						.requestMatchers("/css/**",
+						                 "/images/**",
+						                 "/js/**",
+						                 "/favicon.*",
+						                 "/*/icon-*")
+						.permitAll()
+						.anyRequest()
+						.permitAll())
+				.csrf(AbstractHttpConfigurer::disable)
+				.addFilterBefore(restAuthenticationFilter(authenticationManager), UsernamePasswordAuthenticationFilter.class)
+				.authenticationManager(authenticationManager);
+		return http.build();
+	}
+
+	private RestAuthenticationFilter restAuthenticationFilter(AuthenticationManager authenticationManager) {
+		RestAuthenticationFilter restAuthenticationFilter = new RestAuthenticationFilter();
+		restAuthenticationFilter.setAuthenticationManager(authenticationManager);
+		return restAuthenticationFilter;
 	}
 
 	// userDetailsService를 구현했다면 더이상 사용하지 않음
