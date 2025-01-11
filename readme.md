@@ -92,3 +92,25 @@ flowchart LR
 ```java
     http.addFilterAt(new CustomFilter(),UsernamePasswordAuthenticationFilter.class);
 ```
+
+## h2 인메모리 설정시 콘솔 접근하는 방법
+
+- csrf 보호를 사용중이다
+- X-Frame-Options 헤더를 사용중이다
+
+위 두가지 설정을 유지해야 하는 극악의 환경일 때 h2 콘솔에 접근하는 방법
+
+```java
+
+@Bean
+public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+	http
+			.csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**")) 
+            // 해당 경로는 csrf 보호를 사용하지 않음
+			.headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
+            // 동일 출처에서만 프레임을 허용
+			.authorizeHttpRequests(auth -> auth
+					.requestMatchers("/h2-console/**")
+					.permitAll() // 인증인가없이도 해당 경로 접근 가능 설정
+                        ...
+```
