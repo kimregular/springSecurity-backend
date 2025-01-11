@@ -25,5 +25,4 @@ public class UserController {
 		userService.createUser(account);
 		return "redirect:/";
 	}
-=======
 }
