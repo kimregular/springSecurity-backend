@@ -1,5 +1,6 @@
 package org.example.springsecuritybackend;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -16,4 +17,8 @@ public class SpringSecurityBackendApplication {
     public ModelMapper modelMapper() {
         return new ModelMapper();
     }
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper();}
 }

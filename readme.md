@@ -8,12 +8,12 @@
 
 @Bean
 public UserDetailsService userDetailsService() {
-	UserDetails user = User
-			.withUsername("user")
-			.password("{noop}1111")
-			.roles("USER")
-			.build();
-	return new InMemoryUserDetailsManager(user);
+    UserDetails user = User
+            .withUsername("user")
+            .password("{noop}1111")
+            .roles("USER")
+            .build();
+    return new InMemoryUserDetailsManager(user);
 }
 ```
 
@@ -41,7 +41,7 @@ Spring Security에서 사용자 정보를 나타내는 인터페이스이다.
 
 @Bean
 public PasswordEncoder passwordEncoder() {
-	return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    return PasswordEncoderFactories.createDelegatingPasswordEncoder();
 }
 ```
 
@@ -50,10 +50,78 @@ public PasswordEncoder passwordEncoder() {
 
 **DelegatingPasswordEncoder**  
 `{id}` 형식의 접두사를 사용해서 비밀번호가 어떤 방식으로 인코딩되었는지 식별하는 클래스
+
 ```mermaid
 flowchart LR
     p("1111")
     en("{bcrypt}$2a$10$....")
-    
-    p --> |encode| en
+    p -->|encode| en
 ```
+
+## Filter Config
+
+- 스프링 시큐리티는 HttpSecurity 설정을 통해 어플리케이션의 보안 요구사항에 맞게 필터 체인을 추가 할 수 있게 해준다.
+
+### 필터 추가
+
+- addFilterBefore
+    - 지정된 필터를 필터 체인의 특정 필터 이전에 추가하며 주로 특정 처리가 다른 필터보다 먼저 실행되어야 할 때 사용
+
+```java
+      http.addFilterBefore(new CustomFilter(),UsernamePasswordAuthenticationFilter.class);
+```
+
+- addFilterAfter
+    - 지정된 필터를 필터 체인의 특정 필터 이웋에 추가하며 특정 작업이 다른 필터의 처리를 따라야 할 때 사용
+
+```java
+      http.addFilterAfter(new CustomFilter(),UsernamePasswordAuthenticationFilter.class);
+```
+
+- addFilter
+    - 시큐리티 필터 체인에 새로운 필터를 추가하며 필터의 위치를 지정하지 않고 필터의 유형에 따라 자동으로 적절한 위치에 필터를 추가
+    - 추가하는 필터가 스프링 시큐리티의 필터를 상속받을 경우에 대항하며 그렇지 않을 경우 예외 발생
+
+```java
+    http.addFilter(new CustomFilter());
+```
+
+- addFilterAt()
+    - 지정된 필터를 필터 체인의 특정 필터 위치에 추가하며 특정 필터를 대체하지는 않는다.
+
+```java
+    http.addFilterAt(new CustomFilter(),UsernamePasswordAuthenticationFilter.class);
+```
+
+## h2 인메모리 설정시 콘솔 접근하는 방법
+
+- csrf 보호를 사용중이다
+- X-Frame-Options 헤더를 사용중이다
+
+위 두가지 설정을 유지해야 하는 극악의 환경일 때 h2 콘솔에 접근하는 방법
+
+```java
+
+@Bean
+public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    http
+            .csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**"))
+            // 해당 경로는 csrf 보호를 사용하지 않음
+            .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
+            // 동일 출처에서만 프레임을 허용
+            .authorizeHttpRequests(auth -> auth
+                    .requestMatchers("/h2-console/**")
+                    .permitAll() // 인증인가없이도 해당 경로 접근 가능 설정
+                        ...
+```
+
+## rest exception 핸들러
+
+```java
+exceptionHandling(exception ->exception
+        .authenticationEntryPoint(new RestAuthenticationEntryPoint())
+        .accessDeniedHandler(new RestAccessDeniedHandler()));
+```
+
+- RestAuthenticationEntryPoint : 인증받지 않고 접근 거부시
+- RestAccessDeniedHandler : 인증받은 후 접근 거부시
