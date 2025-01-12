@@ -8,12 +8,12 @@
 
 @Bean
 public UserDetailsService userDetailsService() {
-	UserDetails user = User
-			.withUsername("user")
-			.password("{noop}1111")
-			.roles("USER")
-			.build();
-	return new InMemoryUserDetailsManager(user);
+    UserDetails user = User
+            .withUsername("user")
+            .password("{noop}1111")
+            .roles("USER")
+            .build();
+    return new InMemoryUserDetailsManager(user);
 }
 ```
 
@@ -41,7 +41,7 @@ Spring Security에서 사용자 정보를 나타내는 인터페이스이다.
 
 @Bean
 public PasswordEncoder passwordEncoder() {
-	return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    return PasswordEncoderFactories.createDelegatingPasswordEncoder();
 }
 ```
 
@@ -104,13 +104,24 @@ flowchart LR
 
 @Bean
 public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-	http
-			.csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**")) 
+    http
+            .csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**"))
             // 해당 경로는 csrf 보호를 사용하지 않음
-			.headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
+            .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
             // 동일 출처에서만 프레임을 허용
-			.authorizeHttpRequests(auth -> auth
-					.requestMatchers("/h2-console/**")
-					.permitAll() // 인증인가없이도 해당 경로 접근 가능 설정
+            .authorizeHttpRequests(auth -> auth
+                    .requestMatchers("/h2-console/**")
+                    .permitAll() // 인증인가없이도 해당 경로 접근 가능 설정
                         ...
 ```
+
+## rest exception 핸들러
+
+```java
+exceptionHandling(exception ->exception
+        .authenticationEntryPoint(new RestAuthenticationEntryPoint())
+        .accessDeniedHandler(new RestAccessDeniedHandler()));
+```
+
+- RestAuthenticationEntryPoint : 인증받지 않고 접근 거부시
+- RestAccessDeniedHandler : 인증받은 후 접근 거부시
